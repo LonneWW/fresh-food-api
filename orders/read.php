@@ -1,0 +1,46 @@
+<?php
+// Impostazione degli header HTTP
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json; charset=UTF-8");
+
+// Inclusione dei file necessari
+include_once '../config/database.php';
+include_once '../models/orders.php';
+
+// Creazione dell'oggetto Database e connessione al database
+$database = new Database();
+$db = $database->getConnection();
+
+// Creazione dell'oggetto Order
+$order = new Order($db);
+
+// Esecuzione della query per leggere gli ordini
+$stmt = $order->read();
+$num = $stmt->rowCount();
+
+// Verifica se sono stati trovati ordini
+if ($num > 0) {
+  $orders_arr = array();
+  $orders_arr["elenco"] = array();
+
+  // Recupero dei dati dei ordini
+  while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    extract($row);
+    $order_item = array(
+      "Id" => $Id,
+      "Order_Date" => $Order_Date,
+      "Destination_Country" => $Destination_Country,
+      "Product_Name" => $Product_Name,
+      "Product_Quantity" => $Product_Quantity,
+    );
+    array_push($orders_arr["elenco"], $order_item);
+  }
+
+  // Codice di risposta 200 OK e ritorno dei dati
+  http_response_code(200);
+  echo json_encode($orders_arr);
+} else {
+  // Nessun ordine trovato, codice di risposta 404 Not Found
+  http_response_code(404);
+  echo json_encode(array("message" => "Nessun ordine trovato in Ordini."));
+}
