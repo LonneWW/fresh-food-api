@@ -33,13 +33,13 @@ class Order
   //Leggere il risparmio totale di Co2
   function readSpareCo2($filter = '')
   {
-    $query = "SELECT Id, Order_Date, Destination_Country, Product_Name, Product_Quantity, (Product_Quantity * Co2_Spared) AS Total_Co2_Spared FROM " . $this->table_name . " INNER JOIN products ON product_name = name";
+    $query = "SELECT Id, Order_Date, Destination_Country, Product_Name, Product_Quantity, Co2_Spared as Co2_Spared_Per_Item, (Product_Quantity * Co2_Spared) AS Total_Co2_Spared FROM " . $this->table_name . " INNER JOIN products ON product_name = name";
 
     if ($filter) {
-      echo $query;
       $query .= ' WHERE ' . $filter;
-      echo $query;
     };
+
+    echo $query;
 
     $stmt = $this->conn->prepare($query);
     $stmt->execute();
