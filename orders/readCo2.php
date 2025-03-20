@@ -24,10 +24,8 @@ $num = 0;
 if (!empty($data->column)) {
   if (!empty($data->filter)) {
     $stmt = $order->filterSpareCo2($data->column, $data->filter);
-    echo 'Qui';
   } else {
     $stmt = $order->readSpareCo2();
-    echo 'Qua';
   }
   $num = $stmt->rowCount();
 } else {
