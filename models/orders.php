@@ -1,136 +1,70 @@
 <?php
 class Order
 {
-  private $conn;
-  private $table_name = "orders";
-
-  // Proprietà di un libro
-  public $Id;
-  public $Order_Date;
-  public $Destination_Country;
-  public $Product_Name;
-  public $Product_Quantity;
-
-
-  // Costruttore
-  public function __construct($db)
+  public function read()
   {
-    $this->conn = $db;
+    $query = "SELECT Id, Order_Date, Destination_Country, Product_Name, Product_Quantity FROM orders";
+    return QueryBuilder::query($query);
   }
 
-  // Leggere i libri dal database
-  function read()
+  public function readSpareCo2($params = [])
   {
-    // Query per selezionare tutti i libri
-    $query = "SELECT Id, Order_Date, Destination_Country, Product_Name, Product_Quantity FROM " . $this->table_name;
-
-    $stmt = $this->conn->prepare($query);
-    $stmt->execute();
-
-    return $stmt;
+    $query = "SELECT Id, Order_Date, Destination_Country, Product_Name, Product_Quantity, Co2_Spared as Co2_Spared_Per_Item, (Product_Quantity * Co2_Spared) AS Total_Co2_Spared FROM orders INNER JOIN products ON product_name = name";
+    return QueryBuilder::query($query, $params);
   }
 
-  //Leggere il risparmio totale di Co2
-  function readSpareCo2($filter = '')
+  public function filterSpareCo2($params)
   {
-    $query = "SELECT Id, Order_Date, Destination_Country, Product_Name, Product_Quantity, Co2_Spared as Co2_Spared_Per_Item, (Product_Quantity * Co2_Spared) AS Total_Co2_Spared FROM " . $this->table_name . " INNER JOIN products ON product_name = name";
+    $query = "SELECT Id, Order_Date, Destination_Country, Product_Name, Product_Quantity, Co2_Spared as Co2_Spared_Per_Item, (Product_Quantity * Co2_Spared) AS Total_Co2_Spared FROM orders INNER JOIN products ON product_name = name";
 
-    if ($filter) {
-      $query .= ' WHERE ' . $filter;
-    };
-
-    echo $query;
-
-    $stmt = $this->conn->prepare($query);
-    $stmt->execute();
-
-    return $stmt;
-  }
-
-  //Filtrare la lettura del risparmio totale di Co2
-  function filterSpareCo2($column, $filter)
-  {
-    $condition = ' ';
-
-    if ($column == 'Order_Date') {
+    $condition = ' WHERE ';
+    $column = array_keys($params)[0];
+    $filter = array_values($params)[0];
+    if ($column == 'order_date') {
       $condition .= $column . ' BETWEEN "' . $filter[0] . '" AND "' . $filter[1] . '"';
     } else {
-      $condition = $column . ' = "' . $filter . '"';
+      $condition .= $column . ' = "' . $filter . '"';
     }
-
-    return $this->readSpareCo2($condition);
+    $query = $query . $condition;
+    var_dump($query);
+    var_dump($condition);
+    return QueryBuilder::query($query);
   }
 
-  // Metodo per creare un nuovo libro
-  function create()
+  public function checkProductExistance($name)
   {
-    $query = "INSERT INTO " . $this->table_name . " (order_date, destination_country, product_name, product_quantity) VALUES (:order_date, :destination_country, :product_name, :product_quantity)";
-    $stmt = $this->conn->prepare($query);
-
-    // Sanitizzazione degli input
-    $this->Order_Date = htmlspecialchars(strip_tags($this->Order_Date));
-    $this->Destination_Country = htmlspecialchars(strip_tags($this->Destination_Country));
-    $this->Product_Name = htmlspecialchars(strip_tags($this->Product_Name));
-    $this->Product_Quantity = htmlspecialchars(strip_tags($this->Product_Quantity));
-
-    // Binding dei parametri
-    $stmt->bindParam(":order_date", $this->Order_Date);
-    $stmt->bindParam(":destination_country", $this->Destination_Country);
-    $stmt->bindParam(":product_name", $this->Product_Name);
-    $stmt->bindParam(":product_quantity", $this->Product_Quantity);
-
-    // Esecuzione della query
-    if ($stmt->execute()) {
-      return true;
-    }
-
-    return false;
+    $name = "'" . $name . "'";
+    $query = "SELECT Name, Co2_Spared FROM products WHERE Name = " . $name;
+    return QueryBuilder::query($query);
   }
 
-  // Metodo per aggiornare un libro esistente
-  function update()
+  public function delete($id)
   {
-    $query = "UPDATE " . $this->table_name . " SET Order_Date=:order_date, Destination_Country=:destination_country, Product_Name=:product_name, Product_Quantity=:product_quantity WHERE Id = :Id";
-    $stmt = $this->conn->prepare($query);
-
-    // Sanitizzazione degli input
-    $this->Id = htmlspecialchars(strip_tags($this->Id));
-    $this->Order_Date = htmlspecialchars(strip_tags($this->Order_Date));
-    $this->Destination_Country = htmlspecialchars(strip_tags($this->Destination_Country));
-    $this->Product_Name = htmlspecialchars(strip_tags($this->Product_Name));
-    $this->Product_Quantity = htmlspecialchars(strip_tags($this->Product_Quantity));
-
-    // Binding dei parametri
-    $stmt->bindParam(":Id", $this->Id);
-    $stmt->bindParam(":order_date", $this->Order_Date);
-    $stmt->bindParam(":destination_country", $this->Destination_Country);
-    $stmt->bindParam(":product_name", $this->Product_Name);
-    $stmt->bindParam(":product_quantity", $this->Product_Quantity);
-    // Esecuzione della query
-    if ($stmt->execute()) {
-      return true;
-    }
-
-    return false;
+    $query = "DELETE FROM orders WHERE Id =" . $id;
+    return QueryBuilder::query($query);
+  }
+  public function create($params)
+  {
+    $query = "INSERT INTO orders (order_date, destination_country, product_name, product_quantity) VALUES (:order_date, :destination_country, :product_name, :product_quantity)";
+    $mappedParamsArray = [
+      ':order_date'         => $params['order_date'],
+      ':destination_country' => $params['destination_country'],
+      ':product_name'       => $params['product_name'],
+      ':product_quantity'   => $params['product_quantity']
+    ];
+    return QueryBuilder::query($query, $mappedParamsArray);
   }
 
-  // Metodo per cancellare un libro
-  function delete()
+  public function update($params)
   {
-    $query = "DELETE FROM " . $this->table_name . " WHERE Id = ?";
-    $stmt = $this->conn->prepare($query);
-
-    // Sanitizzazione dell'input
-    $this->Id = htmlspecialchars(strip_tags($this->Id));
-
-    // Binding del parametro
-    $stmt->bindParam(1, $this->Id);
-
-    // Esecuzione della query
-    if ($stmt->execute()) {
-      return true;
-    }
-
-    return false;
+    $query = "UPDATE orders SET Order_Date=:order_date, Destination_Country=:destination_country, Product_Name=:product_name, Product_Quantity=:product_quantity WHERE Id = :id";
+    $mappedParamsArray = [
+      ':order_date'         => $params['order_date'],
+      ':destination_country' => $params['destination_country'],
+      ':product_name'       => $params['product_name'],
+      ':product_quantity'   => $params['product_quantity'],
+      ':id' => $params['id'],
+    ];
+    return QueryBuilder::query($query, $mappedParamsArray);
   }
 }
