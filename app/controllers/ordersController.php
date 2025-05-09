@@ -1,6 +1,5 @@
 <?php
 require './models/orders.php';
-require './validator.php';
 class ordersController
 {
   protected $order;
