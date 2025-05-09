@@ -1,7 +1,6 @@
 <?php
 require './models/orders.php';
-//da fixare chiamate con filtri e parametri
-echo 'ordersController';
+require './validator.php';
 class ordersController
 {
   protected $order;
@@ -31,10 +30,8 @@ class ordersController
 
   public function deleteOrder($params)
   {
-    if (!isset($params['id'])) {
-      throw new Exception("Parametro 'id' mancante.");
-    }
     $id = $params['id'];
+    Validator::validateId($id);
     try {
       $this->order->delete($id);
       http_response_code(200);
@@ -51,22 +48,9 @@ class ordersController
   public function createOrder()
   {
     $data = json_decode(file_get_contents('php://input'), true);
-    $requiredFields = [
-      'order_date',
-      'destination_country',
-      'product_name',
-      'product_quantity'
-    ];
-
-    foreach ($requiredFields as $field) {
-      if (!isset($data[$field]) || empty(trim($data[$field]))) {
-        throw new Exception("Il campo '{$field}' è obbligatorio e non può essere vuoto.");
-      }
-    }
+    Validator::validateOrder($data);
 
     $productExistance = $this->order->checkProductExistance($data['product_name']);
-    var_dump($productExistance);
-
     if (!$productExistance) {
       throw new Exception("Prodotto assente nel database.");
     }
@@ -91,22 +75,8 @@ class ordersController
     }
     $id = $params['id'];
     $data = json_decode(file_get_contents('php://input'), true);
-
-    $data['id'] = (int)$id;
-
-    $requiredFields = [
-      'order_date',
-      'destination_country',
-      'product_name',
-      'product_quantity',
-      'id',
-    ];
-
-    foreach ($requiredFields as $field) {
-      if (!isset($data[$field]) || empty(trim($data[$field]))) {
-        throw new Exception("Il campo '{$field}' è obbligatorio e non può essere vuoto.");
-      }
-    }
+    Validator::validateId($id);
+    Validator::validateOrder($data);
     try {
       $this->order->update($data);
       http_response_code(200);

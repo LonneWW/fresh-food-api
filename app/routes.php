@@ -17,6 +17,3 @@ $router->patch('FreshFoodAPI/products/:name', 'productsController@updateProduct'
 
 $router->delete('FreshFoodAPI/orders/:id', 'ordersController@deleteOrder');
 $router->delete('FreshFoodAPI/products/:name', 'productsController@deleteProduct');
-
-
-var_dump($router->routes);

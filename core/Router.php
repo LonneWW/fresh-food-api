@@ -26,20 +26,12 @@ class Router
     }
 
     foreach ($this->routes[$requestMethod] as $route => $controllerAction) {
-      // Converte la rotta in un pattern regex.
-      // Utilizza preg_replace_callback per trasformare ogni segmento dinamico
-      // da ":id" in una capture group nominata "(?P<id>[^/]+)"
       $pattern = preg_replace_callback('/\:([^\/]+)/', function ($matches) {
         return '(?P<' . $matches[1] . '>[^/]+)';
       }, $route);
-
-      // Escapa le slash e aggiunge delimitatori all'espressione regolare
       $pattern = '#^' . str_replace('/', '\/', $pattern) . '$#';
-
       if (preg_match($pattern, $uri, $matches)) {
-        // Rimuove le chiavi numeriche dall'array dei match
         $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
-        // Chiama l'azione del controller passando i parametri come array associativo
         return $this->callAction($controllerAction, $params);
       }
     }

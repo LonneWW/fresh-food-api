@@ -1,6 +1,6 @@
 <?php
-echo 'productsController.php';
 require './models/products.php';
+require './validator.php';
 class ProductsController
 {
   protected $product;
@@ -17,10 +17,8 @@ class ProductsController
 
   public function deleteProduct($params)
   {
-    if (!isset($params['name'])) {
-      throw new Exception("Parametro 'name' mancante.");
-    }
     $name = $params['name'];
+    Validator::validateName($name);
     try {
       $this->product->delete($name);
       http_response_code(200);
@@ -37,16 +35,7 @@ class ProductsController
   public function createProduct()
   {
     $data = json_decode(file_get_contents('php://input'), true);
-    $requiredFields = [
-      'name',
-      'co2_spared',
-    ];
-
-    foreach ($requiredFields as $field) {
-      if (!isset($data[$field]) || empty(trim($data[$field]))) {
-        throw new Exception("Il campo '{$field}' è obbligatorio e non può essere vuoto.");
-      }
-    }
+    Validator::validateProduct($data);
     try {
       $this->product->create($data);
       http_response_code(200);
@@ -62,24 +51,9 @@ class ProductsController
 
   public function updateProduct($params)
   {
-    if (!isset($params['name'])) {
-      throw new Exception("Parametro 'name' mancante.");
-    }
-
     $data = json_decode(file_get_contents('php://input'), true);
-
     $data['name'] = $params['name'];
-
-    $requiredFields = [
-      'name',
-      'co2_spared',
-    ];
-
-    foreach ($requiredFields as $field) {
-      if (!isset($data[$field]) || empty(trim($data[$field]))) {
-        throw new Exception("Il campo '{$field}' è obbligatorio e non può essere vuoto.");
-      }
-    }
+    Validator::validateProduct($data);
     try {
       $this->product->update($data);
       http_response_code(200);

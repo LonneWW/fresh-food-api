@@ -25,9 +25,6 @@ class Order
     } else {
       $condition .= $column . ' = "' . $filter . '"';
     }
-    $query = $query . $condition;
-    var_dump($query);
-    var_dump($condition);
     return QueryBuilder::query($query);
   }
 
