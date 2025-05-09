@@ -27,14 +27,14 @@ class Validator
     }
   }
 
-  public static function validateName()
+  public static function validateName($name)
   {
-    if (!isset($params['name'])) {
+    if (!isset($name)) {
       throw new Exception("Parameter 'name' missing.");
     }
   }
 
-  public static function validateProduct()
+  public static function validateProduct($data)
   {
     $requiredFields = [
       'name',
@@ -43,7 +43,7 @@ class Validator
 
     foreach ($requiredFields as $field) {
       if (!isset($data[$field]) || empty(trim($data[$field]))) {
-        throw new Exception("Il campo '{$field}' è obbligatorio e non può essere vuoto.");
+        throw new Exception("The field '{$field}' is required and cannot be empty.");
       }
     }
   }

@@ -18,9 +18,10 @@ class ordersController
 
   public function readSpareCo2()
   {
-    $data = json_decode(file_get_contents('php://input'), true);
-    if (count($data) !== 1) {
-      throw new Exception("Troppi parametri per filtrare il risultato.");
+    $data = $_GET;
+    var_dump($_GET);
+    if (count($data) > 1) {
+      throw new Exception("Too many query fields.");
     }
     $orders = $this->order->filterSpareCo2($data);
     http_response_code(200);
@@ -76,6 +77,7 @@ class ordersController
     $data = json_decode(file_get_contents('php://input'), true);
     Validator::validateId($id);
     Validator::validateOrder($data);
+    $data['id'] = (int)$id;
     try {
       $this->order->update($data);
       http_response_code(200);

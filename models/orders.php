@@ -17,13 +17,19 @@ class Order
   {
     $query = "SELECT Id, Order_Date, Destination_Country, Product_Name, Product_Quantity, Co2_Spared as Co2_Spared_Per_Item, (Product_Quantity * Co2_Spared) AS Total_Co2_Spared FROM orders INNER JOIN products ON product_name = name";
 
-    $condition = ' WHERE ';
-    $column = array_keys($params)[0];
-    $filter = array_values($params)[0];
-    if ($column == 'order_date') {
-      $condition .= $column . ' BETWEEN "' . $filter[0] . '" AND "' . $filter[1] . '"';
-    } else {
-      $condition .= $column . ' = "' . $filter . '"';
+    if ($params) {
+      $condition = ' WHERE ';
+      $column = array_keys($params)[0];
+      $filter = array_values($params)[0];
+      if ($column == 'order_date') {
+        $range = extractDates($filter);
+        $condition .= $column . ' BETWEEN "' . $range[0] . '" AND "' . $range[1] . '"';
+      } else {
+        $condition .= $column . ' = "' . $filter . '"';
+      }
+      var_dump($condition);
+      $query = $query . $condition;
+      var_dump($query);
     }
     return QueryBuilder::query($query);
   }
@@ -64,4 +70,15 @@ class Order
     ];
     return QueryBuilder::query($query, $mappedParamsArray);
   }
+}
+
+function extractDates($inputString)
+{
+  preg_match('/from(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})to(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})/', $inputString, $matches);
+  if (count($matches) === 3) {
+    $startDate = str_replace('T', ' ', $matches[1]);
+    $endDate = str_replace('T', ' ', $matches[2]);
+    return [$startDate, $endDate];
+  }
+  throw new Exception("Dates are invalid.");
 }
