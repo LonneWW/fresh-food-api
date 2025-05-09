@@ -76,7 +76,7 @@ To test the API you can use tools like Postman.
 
   `.../FreshFoodAPI/orders/Co2?order_date=from2024-01-01T00:00:00to2025-00-00T00:00:00`
 
-  `.../FreshFoodAPI/orders/Co2?product_name=Canned%20Spaghetti`
+  `.../FreshFoodAPI/orders/Co2?product_name=Canned_Spaghetti`
 
   `.../FreshFoodAPI/orders/Co2?destination_country=Italy`
 
@@ -88,9 +88,9 @@ To test the API you can use tools like Postman.
 
     ```
     {
-      "order_date" : ["2025-00-00 00:00:00", "2026-00-00 00:00:00"],
+      "order_date" : "2025-00-00 00:00:00",
       "destination_country" : "Country",
-      "product_name" : "Product Name",
+      "product_name" : "Product_Name",
       "product_quantity": 10
     }
     ```
@@ -103,9 +103,9 @@ To test the API you can use tools like Postman.
 
     ```
     {
-      "order_date" : ["2025-00-00 00:00:00", "2026-00-00 00:00:00"],
+      "order_date" : "2025-00-00 00:00:00",
       "destination_country" : "Country",
-      "product_name" : "Product Name",
+      "product_name" : "Product_Name",
       "product_quantity": 10
     }
     ```
@@ -128,7 +128,7 @@ To test the API you can use tools like Postman.
 
     ```
     {
-      "name" : "Product Name",
+      "name" : "Product_Name",
       "co2_spared": 10
     }
     ```

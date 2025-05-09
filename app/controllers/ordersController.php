@@ -52,7 +52,7 @@ class ordersController
 
     $productExistance = $this->order->checkProductExistance($data['product_name']);
     if (!$productExistance) {
-      throw new Exception("Prodotto assente nel database.");
+      throw new Exception("{$data['product_name']} is not available in the database.");
     }
 
     try {
